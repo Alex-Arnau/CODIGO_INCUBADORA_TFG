@@ -7,19 +7,22 @@
 #define DHTTYPE DHT11                     // Definimos que tipo de sesor DHT es, en este caso es DHT11.
 
 #define OLED_RESET 4                      // La pantalla LCD+I2C y la OLED van conectadas en los pines Analogico 4 y 5 por defecto.
-#define PinPot A0                         // Definimos el pin del Potienciometro en el Analogico 0
+#define PinPot A0                         // Definimos el pin del Potienciometro en el Analogico 0.
+#define LDR A1                            // Definimos el pin del sensor LDR en el Analogico 1.
+#define LED_LDR 0                         // Definimos el pin del LED que usaremos como como aviso si el sensor LDR detecta mucha luz en el pin 0.
+#define BOTON_MAS_HUM 1                   // Definimos el pin del boton que usaremos para aumentar la humedad objetivo en el pin 1.
+#define BOTON_MENOS_HUM 2                 // Definimos el pin del boton que usaremos para disminuir la humedad objetivo en el pin 2.
+#define BOTON_MAS_TEMP 3                  // Definimos el pin del boton que usaremos para aumentar la temperatura objetivo en el pin 3.
+#define BOTON_MENOS_TEMP 4                // Definimos el pin del boton que usaremos para disminuir la temperatura objetivo en el pin 4.
+#define LED_ILUMINACION 5                 // Definimos el pin para los LEDs que usaremos para la iluminacion, es importante que la entrada digital sea PWM en el pin 5.
+#define RELE_HUMIDIFICADOR 6              // Definimos el pin del rele que usaremos para alimentar el humidificador en el pin 6.
+#define RELE_VENTILACION 7                // Definimos el pin del rele que usaremos para alimentar los ventiladores en el pin 7.
+#define RELE_CALEFACTOR 8                 // Definimos el pin del rele que usaremos para alimentar la placa calefactora en el pin 8.
+#define DHTPIN 9                          // Definimos el pin del DHT11 en el pin 9, aun siendo un sensor es posible conectarlo en un pin digital.
 #define BUZZER_ALARMA_TEMP 10             // Definimos el pin del Buzzer que utilizaremos en modo de alarma en el pin 10.
-#define LED_ALARMA_TEMP 11                // Definimos el pin del LED que utilizaremos en modo de alarma para la temperatura en el pin 11.
-#define LED_ALARMA_HUM 12                 // Definimos el pin del LED que utilizaremos en modo de alarma para la humedad en el pin 12.
-#define BOTON_MAS_HUM 1                   // Definimos el pin del boton que usaremos para aumentar la humedad objetivo.
-#define BOTON_MENOS_HUM 2                 // Definimos el pin del boton que usaremos para disminuir la humedad objetivo.
-#define BOTON_MAS_TEMP 3                  // Definimos el pin del boton que usaremos para aumentar la temperatura objetivo.
-#define BOTON_MENOS_TEMP 4                // Definimos el pin del boton que usaremos para disminuir la temperatura objetivo.
-#define LED_ILUMINACION 5                 // Definimos el pin para los LEDs que usaremos para la iluminacion, es importante que la entrada digital sea PWM.
-#define RELE_HUMIDIFICADOR 6              // Definimos el pin del rele que usaremos para alimentar el humidificador.
-#define RELE_VENTILACION 7                // Definimos el pin del rele que usaremos para alimentar los ventiladores.
-#define RELE_CALEFACTOR 8                 // Definimos el pin del rele que usaremos para alimentar la placa calefactora.
-#define DHTPIN 9                          // Definimos el pin del DHT11 en el pin 0, aun siendo un sensor es posible conectarlo en un pin digital.
+#define BUZZER_ALARMA_HUM 11              // Definimos el pin del Buzzer que utilizaremos en modo de alarma en el pin 11.
+#define LED_ALARMA_TEMP 12                // Definimos el pin del LED que utilizaremos en modo de alarma para la temperatura en el pin 12.
+#define LED_ALARMA_HUM 13                 // Definimos el pin del LED que utilizaremos en modo de alarma para la humedad en el pin 13.
 
 LiquidCrystal_I2C lcd(LCD_ADDR,16,2);     // Establecemos la configuracion de la pantalla LCD (Tamaño de la letra,Numero de caracteres por linea,Numero de lineas)
 Adafruit_SSD1306 display(OLED_RESET);     // Configuracion para el funcionamiento de la pantalla OLED.
@@ -74,6 +77,8 @@ unsigned long currentMillis = millis();                  //
 if (currentMillis - previousMillis >= interval) {        // Declaramos el intervalo de tiempo.
 previousMillis = currentMillis;                          //
 
+int valorLDR = analogRead(LDR);                          // La variable lee los valores del sensor LDR (entre 0-1023).
+
 int ValorPot = analogRead(PinPot);                       // La variable se declara como los valores que aporta el potiencimetro.
 int Iluminacion = map(ValorPot, 0, 1023, 0, 255);        // El valor de iluminacion sera el regulado por el potiencimetro dentro de los valores de potencia de un LED.
 analogWrite(LED_ILUMINACION, Iluminacion);               // El led recibira un potencia regulada por el potiencimetro.
@@ -99,69 +104,91 @@ else {                                                   // En caso de que la te
   }
 
 if (EstadoBOTON_MAS_HUM == LOW) {                        // Si se pulsa el boton 1.
-    HumedadObjetivo ++;                                   // Aumenta la humedad objetivo en 1.
+    HumedadObjetivo ++;                                  // Aumenta la humedad objetivo en 1.
     delay(500);                                          // Espera de 0,5 segundos.
   }
 if (EstadoBOTON_MENOS_HUM == LOW) {                      // Si se pulsa el boton 2.
-    HumedadObjetivo --;                                   // Disminuye la humedad objetivo en 1.
+    HumedadObjetivo --;                                  // Disminuye la humedad objetivo en 1.
     delay(500);                                          // Espera de 0,5 segundos.
   }
 if (EstadoBOTON_MAS_TEMP == LOW) {                       // Si se pulsa el boton 3.
-    TemperaturaObjetivo ++;                               // Aumenta la temperatura objetivo en 1.
+    TemperaturaObjetivo ++;                              // Aumenta la temperatura objetivo en 1.
     delay(500);                                          // Espera de 0,5 segundos.
   }
 if (EstadoBOTON_MENOS_TEMP == LOW) {                     // Si se pulsa el boton 4.
-    TemperaturaObjetivo --;                               // Disminuye la temperatura objetivo en 1.
+    TemperaturaObjetivo --;                              // Disminuye la temperatura objetivo en 1.
     delay(500);                                          // Espera de 0,5 segundos.
   }
 
-if (HumedadObjetivo >= 61) {                             // Si la humedad objetivo es mayor o igual a 41.
+if (HumedadObjetivo >= 61) {                             // Si la humedad objetivo es mayor o igual a 61.
   lcd.clear();                                           //
   lcd.setCursor(0,0);                                    // Se mostrará en la pantalla LCD el  mensaje:
   lcd.print("Hum.Max.Perm: ");                           // 
   lcd.setCursor(0,8);                                    // "Hum.Max.Perm:"
-  lcd.print("60%");                                      // "40%"
+  lcd.print("60%");                                      // "60%"
   delay(3000);                                           // Pausa de 3 segundos.
-  HumedadObjetivo = 60;                                  // La humedad objetivo volvera a ser 40.
+  HumedadObjetivo = 60;                                  // La humedad objetivo volvera a ser 60.
   }
-if (HumedadObjetivo <= 29) {                             // Si la humedad objetivo es menor o igual a 26.
+if (HumedadObjetivo <= 29) {                             // Si la humedad objetivo es menor o igual a 29.
   lcd.clear();                                           // 
   lcd.setCursor(0,0);                                    // Se mostrará en la pantalla LCD el  mensaje:
   lcd.print("Hum.Min.Perm.: ");                          // 
   lcd.setCursor(0,8);                                    // "Hum.Min.Perm.: "
-  lcd.print("30%");                                      // "27%"
+  lcd.print("30%");                                      // "30%"
   delay(3000);                                           // Pausa de 3 segundos.
-  HumedadObjetivo = 30;                              // La humedad objetivo volvera a ser 27%.
+  HumedadObjetivo = 30;                                  // La humedad objetivo volvera a ser 30%.
   }
-if (TemperaturaObjetivo >= 38.5) {                          // Si la temperatura objetivo es mayor o igual a 25.
+if (TemperaturaObjetivo >= 39) {                         // Si la temperatura objetivo es mayor o igual a 39.
   lcd.clear();                                           //
   lcd.setCursor(0,0);                                    // Se mostrará en la pantalla LCD el  mensaje:
   lcd.print("Temp.Max.Perm: ");                          // 
   lcd.setCursor(0,8);                                    // "Temp.Max.Perm: "
-  lcd.print("38C");                                      // "24C"
+  lcd.print("38C");                                      // "38C"
   delay(3000);                                           // Pausa de 3 segundos.
-  TemperaturaObjetivo = 38;                                  // La temperatura objetivo volvera a ser 24C.
+  TemperaturaObjetivo = 38;                              // La temperatura objetivo volvera a ser C.
   }
-if (TemperaturaObjetivo <= 34.5) {                         // Si la temperatura objetivo es menor o igual a 16.
+if (TemperaturaObjetivo <= 33) {                         // Si la temperatura objetivo es menor o igual a 33.
   lcd.clear();                                           //
   lcd.setCursor(0,0);                                    // Se mostrará en la pantalla LCD el  mensaje:
   lcd.print("Temp.Min.Perm.: ");                         //
   lcd.setCursor(0,8);                                    // "Temp.Min.Perm.: "
-  lcd.print("35C");                                      // "17C"
+  lcd.print("34C");                                      // "34C"
   delay(3000);                                           // Pausa de 3 segundos
-  TemperaturaObjetivo = 35;                              // La temperatura objetivo volvera a ser 17C.
+  TemperaturaObjetivo = 34;                              // La temperatura objetivo volvera a ser 34C.
   }
 
-if (temperatura >= 40 or temperatura <=35) {             // Si la temperatura detectada es mayor a 40º.
-    digitalWrite(BUZZER_ALARMA_TEMP, HIGH);              // Se encendera el humidificador
-    digitalWrite(LED_ALARMA_TEMP, HIGH); 
-    delay(1500);
-    digitalWrite(BUZZER_ALARMA_TEMP, LOW); 
-    digitalWrite(LED_ALARMA_TEMP, LOW); 
+if (temperatura >= 39 or temperatura <=33) {             // Si la temperatura detectada es mayor o igual a 39º, o menor o igual a 33º.
+    digitalWrite(BUZZER_ALARMA_TEMP, HIGH);              // El buzzer de la alarma de temperatura se encenderá.
+    digitalWrite(LED_ALARMA_TEMP, HIGH);                 // El LED de alarma de temperatura se encenderá.
+    delay(1500);                                         // Pausa de 1,5 segundos.
+    digitalWrite(BUZZER_ALARMA_TEMP, LOW);               // El buzzer de la alarma de temperatura se apagará.
+    digitalWrite(LED_ALARMA_TEMP, LOW);                  // El LED de alarma de temperatura se apagará.
   }
-else {
-    digitalWrite(BUZZER_ALARMA_TEMP, LOW); 
+  else {                                                 // Si la temperatura detectada no es mayor o igual a 39º, y tampoco es menor o igual a 33º.
+    digitalWrite(BUZZER_ALARMA_TEMP, LOW);               // El buzzer de la alarma de temperatura se apagará.
+    digitalWrite(LED_ALARMA_TEMP, LOW);                  // El LED de alarma de temperatura se apagará.
   }
+if (humedad >= 81 or humedad <=29) {                     // Si la humedad detectada es mayor o igual al 81%, o es menor o igual al 29%.
+    digitalWrite(BUZZER_ALARMA_HUM, HIGH);               // Se encendera el buzzer de alarma de humedad.
+    digitalWrite(LED_ALARMA_HUM, HIGH);                  // Se encendera el LED de alarma de humedad.            
+    delay(1500);                                         // Espera de 1,5 segundos.
+    digitalWrite(BUZZER_ALARMA_HUM, LOW);                // Se apagara el buzzer de alarma de humedad.
+    digitalWrite(LED_ALARMA_HUM, LOW);                   // Se apagara el LED de alarma de humedad.
+  }
+  else {                                                 // Si la humedad detectada no es mayor o igual al 81%, y tampoco es menor o igual al 29%.
+    digitalWrite(BUZZER_ALARMA_HUM, LOW);                // Se apagara el buzzer de alarma de humedad.
+    digitalWrite(LED_ALARMA_HUM, LOW);                   // Se apagara el LED de alarma de humedad.
+  }
+
+if (valorLDR >= 600){                                    // Si el valor del LDR es mayor o igual a 600
+    digitalWrite(LED_LDR, HIGH);                         // El LED del LDR se enciende
+    delay(1500);                                         // Espera de 1,5 segundos
+    digitalWrite(LED_LDR, LOW);                          // El LED del LDR se apaga
+}
+  else {                                                 // Si el valor del LDR es menor a 600
+    digitalWrite(LED_LDR, LOW);                          // El LED del LDR se apaga
+  }
+
 
   display.clearDisplay();                                // Se elimina todo lo que hay en la pantalla OLED.
   display.setTextSize(1);                                // Se determina el tamaño de la letra de la pantalla OLED.
@@ -187,6 +214,3 @@ else {
   lcd.println("C     ");                                 // Aparece el mensaje "C" en la linea 2.
 }
 }                                                        // Fin
-
-
-
